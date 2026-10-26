@@ -165,6 +165,7 @@
   let spawnTimer = 0;
   let gameState = 'menu';   // menu | playing | paused | over | win | levelclear
   let stateTimer = 0;
+  let gameOverReason = '';
   let shake = 0;          // 屏幕震动
   let flashBase = 0;      // 基地被毁闪烁
   let playerInv = 0;      // 玩家无敌时间（出生保护）
@@ -220,8 +221,13 @@
       }
       m.push(row);
     }
-    // 基地（老鹰）放在底部中央
+    // 基地（老鹰）放在底部中央，四周加砖墙保护（上方与两侧）
     m[ROWS - 1][6] = BASE;
+    m[ROWS - 1][5] = BRICK;
+    m[ROWS - 1][7] = BRICK;
+    m[ROWS - 2][5] = BRICK;
+    m[ROWS - 2][6] = BRICK;
+    m[ROWS - 2][7] = BRICK;
     return m;
   }
 
@@ -349,7 +355,8 @@
         if (b.isPlayer) spark(b.x, b.y, '#fff');
         b.alive = false; return;
       } else if (v === BASE) {
-        destroyBase();
+        // 只有敌方子弹能摧毁基地，玩家子弹打在基地上无效
+        if (!b.isPlayer) destroyBase();
         b.alive = false; return;
       } else if (v === WATER) {
         b.alive = false; return;
@@ -400,6 +407,7 @@
       flashBase = 90;
       shake = 20;
       AUDIO.die();
+      gameOverReason = '基地被摧毁！';
       gameOver();
     }
   }
@@ -425,6 +433,7 @@
     shake = 15;
     updateHUD();
     if (lives <= 0) {
+      gameOverReason = '生命耗尽！';
       gameOver();
     } else {
       // 延迟重生
@@ -709,7 +718,7 @@
 
     // 覆盖层
     if (gameState === 'menu') overlay('坦克大战', '按 回车 或点击「开始」', '经典 Battle City 风格');
-    else if (gameState === 'over') overlay('游戏结束', `得分 ${score}`, '按 回车 重新开始');
+    else if (gameState === 'over') overlay('游戏结束', `${gameOverReason} · 得分 ${score}`, '按 回车 重新开始');
     else if (gameState === 'win') overlay('你赢了！', `最终得分 ${score}`, '按 回车 再来一局');
     else if (gameState === 'levelclear') overlay(`第 ${level} 关 完成`, '+500 奖励分', '即将进入下一关…');
     else if (gameState === 'paused') overlay('已暂停', '', '按 P 继续');
