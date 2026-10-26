@@ -275,7 +275,7 @@
   }
 
   function spawnPlayer() {
-    const cx = 6 * TILE + (TILE - TANK) / 2;   // 底部中央偏左（基地左边）
+    const cx = 4 * TILE + (TILE - TANK) / 2;   // 基地左边一格（列 4），避开基地
     const cy = 12 * TILE + (TILE - TANK) / 2;
     player = createTank(cx, cy, 0, true);
     playerInv = 120;
@@ -861,9 +861,8 @@
     requestAnimationFrame(loop);
   }
 
-  // 初始化
-  map = decodeLevel(LEVELS[0]);
-  updateHUD();
+  // 初始化：自动开始游戏，坦克立即可操作
+  startGame();
   requestAnimationFrame(loop);
 })();
 </script>
